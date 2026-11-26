@@ -100,7 +100,31 @@ def main() -> None:
         while it.average_price in prices:  # keep prices distinct for the quiz
             it.average_price += 10
         it.max_price = max(it.max_price, it.average_price)
-        img = fetch_image(it.mercari_search_keyword, it.image_search_keyword_en)
+        from image_fetcher import FALLBACK, fetch_wikimedia
+        from rakuten_client import fetch_market_data, is_configured as rakuten_configured
+
+        img = None
+        if rakuten_configured():
+            mkt = fetch_market_data(it.mercari_search_keyword)
+            if mkt:
+                if mkt.get("image_url"):
+                    img = {
+                        "image_url": mkt["image_url"],
+                        "image_source_type": "rakuten",
+                        "image_attribution": "楽天市場",
+                        "affiliate_product_url": mkt["affiliate_product_url"],
+                    }
+                if mkt.get("prices"):
+                    p = mkt["prices"]
+                    it.min_price = p["min_price"]
+                    it.average_price = p["average_price"]
+                    it.max_price = p["max_price"]
+                    while it.average_price in prices:
+                        it.average_price += 10
+                    it.min_price = min(it.min_price, it.average_price)
+                    it.max_price = max(it.max_price, it.average_price)
+        if not img:
+            img = fetch_wikimedia(it.image_search_keyword_en) or dict(FALLBACK)
         row = it.model_dump()
         row.pop("image_search_keyword_en")
         row.update(img)

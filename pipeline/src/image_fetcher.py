@@ -50,49 +50,17 @@ def _get_json(url: str, params: Dict[str, Any]) -> Dict[str, Any]:
 
 # ---------------------------------------------------------------- Rakuten
 def fetch_rakuten(keyword: str) -> Optional[Dict[str, Any]]:
-    app_id = os.environ.get("RAKUTEN_APP_ID")
-    if not app_id or not keyword:
+    from rakuten_client import fetch_market_data
+
+    data = fetch_market_data(keyword)
+    if not data or not data.get("image_url"):
         return None
-    access_key = os.environ.get("RAKUTEN_ACCESS_KEY")
-    url = (
-        "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20220601"
-        if access_key
-        else "https://app.rakuten.co.jp/services/api/IchibaItem/Search/20220601"
-    )
-    params: Dict[str, Any] = {
-        "applicationId": app_id,
-        "keyword": keyword,
-        "imageFlag": 1,
-        "hits": 5,
-        "format": "json",
-        "formatVersion": 2,
+    return {
+        "image_url": data["image_url"],
+        "image_source_type": "rakuten",
+        "image_attribution": "楽天市場",
+        "affiliate_product_url": data["affiliate_product_url"],
     }
-    if access_key:
-        params["accessKey"] = access_key
-    if os.environ.get("RAKUTEN_AFFILIATE_ID"):
-        params["affiliateId"] = os.environ["RAKUTEN_AFFILIATE_ID"]
-    try:
-        data = _get_json(url, params)
-    except Exception as e:
-        print("  [rakuten] error: {}".format(e))
-        return None
-    for it in data.get("Items", []):
-        it = it.get("Item", it)
-        imgs = it.get("mediumImageUrls") or []
-        if not imgs:
-            continue
-        first = imgs[0]
-        img = first.get("imageUrl") if isinstance(first, dict) else first
-        if not img:
-            continue
-        img = re.sub(r"\?_ex=\d+x\d+", "?_ex=400x400", img)
-        return {
-            "image_url": img,
-            "image_source_type": "rakuten",
-            "image_attribution": "楽天市場",
-            "affiliate_product_url": it.get("affiliateUrl") or it.get("itemUrl"),
-        }
-    return None
 
 
 # -------------------------------------------------------------- Wikimedia
