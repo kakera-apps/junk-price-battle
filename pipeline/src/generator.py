@@ -75,7 +75,7 @@ def main() -> None:
 
     conn = connect()
     slugs, prices, titles = existing_slugs_and_prices(conn)
-    client = genai.Client(api_key=key)
+    client = genai.Client(api_key=key, http_options=types.HttpOptions(api_version="v1beta"))
     resp = client.models.generate_content(
         model=os.environ.get("GEMINI_MODEL", "gemini-2.5-flash"),
         contents=build_prompt(args.count, titles, list(prices)),
