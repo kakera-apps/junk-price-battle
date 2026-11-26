@@ -1,0 +1,12 @@
+data/*.db
+data/*.db-journal
+.env
+.env.local
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts

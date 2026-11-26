@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-label="趣味・日用品">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#15803d"/><stop offset="1" stop-color="#65a30d"/></linearGradient></defs>
+<rect width="640" height="480" fill="url(#g)"/>
+<g opacity=".12" fill="#fff"><circle cx="90" cy="80" r="60"/><circle cx="560" cy="400" r="90"/><rect x="480" y="40" width="100" height="100" rx="20"/></g>
+<g fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" transform="translate(320 210)"><path d="M0 -90l28 58 62 8-45 44 11 62-56-30-56 30 11-62-45-44 62-8z"/></g>
+<text x="320" y="400" text-anchor="middle" font-family="sans-serif" font-size="34" font-weight="700" fill="#fff">趣味・日用品</text>
+</svg>
