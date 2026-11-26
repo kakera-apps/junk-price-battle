@@ -35,7 +35,7 @@ export default function QuizArena() {
   const topRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("/api/quiz/")
+    fetch("/api/quiz.json")
       .then((r) => r.json())
       .then((d) => {
         setPool(d.items);
@@ -260,4 +260,5 @@ export default function QuizArena() {
     </div>
   );
 }
+
 
