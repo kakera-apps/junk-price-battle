@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
 import "./globals.css";
@@ -36,6 +36,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <main className="mx-auto max-w-3xl px-4 py-6">{children}</main>
         <footer className="mx-auto max-w-3xl px-4 pb-10 text-xs leading-relaxed text-stone-500">
+          <p className="mb-2 flex gap-4 font-bold">
+            <Link href="/about/" className="underline">運営者情報・広告について</Link>
+            <Link href="/privacy/" className="underline">プライバシーポリシー</Link>
+          </p>
           <p>
             当サイトはアフィリエイト広告（Amazonアソシエイト、楽天アフィリエイト、メルカリアンバサダー、宅配買取ASP等）および Google AdSense を利用しています。
           </p>
@@ -46,3 +50,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
