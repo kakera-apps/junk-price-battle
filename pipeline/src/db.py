@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS items (
     listing_template TEXT,
     mercari_search_keyword TEXT,
     image_url TEXT,
-    image_source_type TEXT CHECK (image_source_type IN ('rakuten','wikimedia','fallback')),
+    image_source_type TEXT CHECK (image_source_type IN ('rakuten','yahoo','wikimedia','fallback')),
     image_attribution TEXT,
     affiliate_product_url TEXT,
     created_at TEXT NOT NULL,
@@ -56,12 +56,29 @@ def now() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
+def _migrate_check_constraint(conn: sqlite3.Connection) -> None:
+    """Allow 'yahoo' in image_source_type CHECK constraint on existing DBs."""
+    row = conn.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='items'").fetchone()
+    if not row or "'yahoo'" in (row["sql"] or ""):
+        return
+    cols = ", ".join(FIELDS) + ", created_at, updated_at"
+    conn.executescript(
+        "BEGIN;"
+        "ALTER TABLE items RENAME TO items_old;"
+        + SCHEMA
+        + "INSERT INTO items (id, {c}) SELECT id, {c} FROM items_old;".format(c=cols)
+        + "DROP TABLE items_old;"
+        "COMMIT;"
+    )
+
+
 def connect(path: Optional[str] = None) -> sqlite3.Connection:
     path = path or DB_PATH
     os.makedirs(os.path.dirname(path), exist_ok=True)
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    _migrate_check_constraint(conn)
     return conn
 
 

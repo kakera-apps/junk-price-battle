@@ -17,7 +17,7 @@ export type Item = {
   listing_template: string | null;
   mercari_search_keyword: string | null;
   image_url: string | null;
-  image_source_type: "rakuten" | "wikimedia" | "fallback" | null;
+  image_source_type: "rakuten" | "yahoo" | "wikimedia" | "fallback" | null;
   image_attribution: string | null;
   affiliate_product_url: string | null;
 };

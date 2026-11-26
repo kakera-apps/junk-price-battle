@@ -124,9 +124,27 @@ def fetch_wikimedia(keyword_en: str) -> Optional[Dict[str, Any]]:
     return None
 
 
+def fetch_yahoo(keyword: str) -> Optional[Dict[str, Any]]:
+    from yahoo_client import fetch_market_data
+
+    data = fetch_market_data(keyword)
+    if not data or not data.get("image_url"):
+        return None
+    return {
+        "image_url": data["image_url"],
+        "image_source_type": "yahoo",
+        "image_attribution": "Yahoo!ショッピング",
+        "affiliate_product_url": data["affiliate_product_url"],
+    }
+
+
 def fetch_image(rakuten_keyword: str, wikimedia_keyword_en: str) -> Dict[str, Any]:
     """Return image info dict. Always returns a valid dict (fallback on failure)."""
-    for fn, kw in ((fetch_rakuten, rakuten_keyword), (fetch_wikimedia, wikimedia_keyword_en)):
+    for fn, kw in (
+        (fetch_rakuten, rakuten_keyword),
+        (fetch_yahoo, rakuten_keyword),
+        (fetch_wikimedia, wikimedia_keyword_en),
+    ):
         try:
             res = fn(kw)
         except Exception as e:  # defensive: never break the pipeline

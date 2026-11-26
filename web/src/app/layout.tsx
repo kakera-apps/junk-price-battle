@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             当サイトはアフィリエイト広告（Amazonアソシエイト、楽天アフィリエイト、メルカリアンバサダー、宅配買取ASP等）および Google AdSense を利用しています。
           </p>
           <p>掲載価格はフリマ・オークションの過去取引を基にした推定の目安であり、売却価格を保証するものではありません。</p>
-          <p>画像は楽天ウェブサービス、または Wikimedia Commons（CC0/パブリックドメイン/CC BY）より、各出典表記とともに掲載しています。</p>
+          <p>画像は楽天ウェブサービス、Yahoo!ショッピング（Web Services by Yahoo! JAPAN）、または Wikimedia Commons（CC0/パブリックドメイン/CC BY）より、各出典表記とともに掲載しています。</p>
         </footer>
       </body>
     </html>

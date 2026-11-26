@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "thumbnail.image.rakuten.co.jp" },
       { protocol: "https", hostname: "image.rakuten.co.jp" },
       { protocol: "https", hostname: "shop.r10s.jp" },
+      { protocol: "https", hostname: "item-shopping.c.yimg.jp" },
+      { protocol: "https", hostname: "shopping.c.yimg.jp" },
       { protocol: "https", hostname: "upload.wikimedia.org" },
       { protocol: "https", hostname: "commons.wikimedia.org" },
     ],

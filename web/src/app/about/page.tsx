@@ -37,7 +37,7 @@ export default function About() {
       <section>
         <h2 className="mb-1 font-black">画像の出典</h2>
         <p>
-          画像は楽天ウェブサービス、または Wikimedia Commons（CC0／パブリックドメイン／CC BY）のものを、各画像に出典を表記して掲載しています。画像がない場合はイメージイラストを表示します。
+          画像は楽天ウェブサービス、Yahoo!ショッピング（Web Services by Yahoo! JAPAN）、または Wikimedia Commons（CC0／パブリックドメイン／CC BY）のものを、各画像に出典を表記して掲載しています。画像がない場合はイメージイラストを表示します。
           メルカリ・ヤフオク等の画像やデータを無断で取得・掲載することはありません。
         </p>
       </section>

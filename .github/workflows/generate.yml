@@ -27,6 +27,9 @@ jobs:
           RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          YAHOO_CLIENT_ID: ${{ secrets.YAHOO_CLIENT_ID }}
+          YAHOO_VC_SID: ${{ secrets.YAHOO_VC_SID }}
+          YAHOO_VC_PID: ${{ secrets.YAHOO_VC_PID }}
         run: python pipeline/src/generator.py
       - name: Sync existing items with Rakuten API (if configured)
         if: ${{ secrets.RAKUTEN_APP_ID != '' }}
@@ -35,6 +38,13 @@ jobs:
           RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
           RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
         run: python pipeline/src/rakuten_sync.py --only-missing
+      - name: Sync existing items with Yahoo! Shopping API (if configured)
+        if: ${{ secrets.YAHOO_CLIENT_ID != '' }}
+        env:
+          YAHOO_CLIENT_ID: ${{ secrets.YAHOO_CLIENT_ID }}
+          YAHOO_VC_SID: ${{ secrets.YAHOO_VC_SID }}
+          YAHOO_VC_PID: ${{ secrets.YAHOO_VC_PID }}
+        run: python pipeline/src/yahoo_sync.py --only-missing
       - name: Commit DB
         run: |
           git config user.name "github-actions"
