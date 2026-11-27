@@ -20,19 +20,22 @@ export default function CopyTemplateButton({ text, label = "出品用テンプ�
       document.body.removeChild(ta);
     }
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2200);
   }
 
   return (
     <button
       type="button"
       onClick={copy}
-      className={`inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-bold transition ${
-        copied ? "border-green-600 bg-green-50 text-green-700" : "border-stone-300 bg-white text-stone-700 hover:bg-stone-50"
+      aria-live="polite"
+      className={`inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-lg border px-3.5 py-2 text-sm font-semibold transition duration-150 ${
+        copied
+          ? "border-emerald-600 bg-emerald-50 text-emerald-800"
+          : "border-stone-300 bg-white text-stone-700 hover:border-stone-400 hover:bg-stone-50"
       }`}
     >
-      {copied ? <Check size={16} /> : <ClipboardCopy size={16} />}
-      {copied ? "コピーしました！" : label}
+      {copied ? <Check size={16} aria-hidden="true" /> : <ClipboardCopy size={16} aria-hidden="true" />}
+      <span>{copied ? "コピーしました！" : label}</span>
     </button>
   );
 }
