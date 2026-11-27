@@ -185,12 +185,16 @@ def post_to_bluesky(
 
 # ----------------------------------------------------------------- Threads
 def post_to_threads(text: str, link_url: Optional[str] = None) -> str:
-    raw_uid = os.environ.get("THREADS_USER_ID", "").strip()
     token = os.environ.get("THREADS_ACCESS_TOKEN", "").strip()
     if not token:
         raise RuntimeError("THREADS_ACCESS_TOKEN が未設定です。")
-    # Threads Graph API expects numeric user ID or 'me'
-    uid = raw_uid if raw_uid.isdigit() else "me"
+
+    # Resolve the authenticated Threads user ID directly via /me (avoids App ID / User ID mix-ups)
+    me = _http_json(
+        "https://graph.threads.net/v1.0/me?fields=id,username&access_token=" + urllib.parse.quote(token, safe="")
+    )
+    uid = str(me["id"])
+    print("  [threads] authenticated as @{} (id={})".format(me.get("username", "?"), uid))
 
     # Step 1: Create media container (retry without link_attachment if 400)
     base_payload: Dict[str, Any] = {
