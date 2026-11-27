@@ -1,0 +1,62 @@
+name: Auto post to Bluesky & Threads (daily)
+
+# 毎日 8:00 JST (2択クイズ) と 20:00 JST (ガラクタ豆知識) を Bluesky / Threads に完全無料で自動投稿
+# 未設定の SNS は自動スキップされるため、片方だけ設定して運用開始できます
+on:
+  schedule:
+    - cron: "0 23 * * *" # 08:00 JST (quiz)
+    - cron: "0 11 * * *" # 20:00 JST (trivia)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Post mode (quiz / trivia / auto)"
+        required: true
+        default: "quiz"
+        type: choice
+        options:
+          - quiz
+          - trivia
+          - auto
+      platform:
+        description: "Target platform"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - bluesky
+          - threads
+      dry_run:
+        description: "Dry run (do not post)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Japanese font & Pillow
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+          pip install pillow python-dotenv
+      - name: Post to Bluesky & Threads
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          SITE_URL: "https://junkproduct.com"
+          INPUT_MODE: ${{ github.event.inputs.mode || 'auto' }}
+          INPUT_PLATFORM: ${{ github.event.inputs.platform || 'all' }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          if [ "$INPUT_DRY_RUN" = "true" ]; then
+            python pipeline/src/sns_poster.py --mode "$INPUT_MODE" --platform "$INPUT_PLATFORM" --dry-run
+          else
+            python pipeline/src/sns_poster.py --mode "$INPUT_MODE" --platform "$INPUT_PLATFORM"
+          fi
