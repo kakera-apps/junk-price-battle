@@ -1,10 +1,7 @@
 name: Auto post to X (daily)
 
-# 毎日 8:00 JST (2択クイズ＋比較画像) と 20:00 JST (ガラクタ豆知識＋図鑑URL) を X に自動投稿
+# X API (Pay Per Use) のクレジット未購入時は定期実行を停止（手動実行のみ有効）
 on:
-  schedule:
-    - cron: "0 23 * * *" # 08:00 JST (quiz)
-    - cron: "0 11 * * *" # 20:00 JST (trivia)
   workflow_dispatch:
     inputs:
       mode:
