@@ -17,6 +17,7 @@ import os
 import re
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from typing import Any, Dict, List, Optional
@@ -67,8 +68,16 @@ def _http_json(
     elif raw_body is not None:
         data = raw_body
     req = urllib.request.Request(url, data=data, headers=hdrs, method=method)
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", errors="replace")
+        except Exception:
+            pass
+        raise RuntimeError("HTTP {} {}: {}".format(e.code, e.reason, body)) from e
 
 
 # ----------------------------------------------------------------- Bluesky
@@ -176,25 +185,28 @@ def post_to_bluesky(
 
 # ----------------------------------------------------------------- Threads
 def post_to_threads(text: str, link_url: Optional[str] = None) -> str:
-    user_id = os.environ.get("THREADS_USER_ID", "").strip()
+    raw_uid = os.environ.get("THREADS_USER_ID", "").strip()
     token = os.environ.get("THREADS_ACCESS_TOKEN", "").strip()
-    if not user_id or not token:
-        raise RuntimeError("THREADS_USER_ID / THREADS_ACCESS_TOKEN が未設定です。")
+    if not token:
+        raise RuntimeError("THREADS_ACCESS_TOKEN が未設定です。")
+    # Threads Graph API expects numeric user ID or 'me'
+    uid = raw_uid if raw_uid.isdigit() else "me"
 
-    # Step 1: Create media container
-    payload: Dict[str, Any] = {
+    # Step 1: Create media container (retry without link_attachment if 400)
+    base_payload: Dict[str, Any] = {
         "media_type": "TEXT",
         "text": text,
         "access_token": token,
     }
+    endpoint = "https://graph.threads.net/v1.0/{}/threads".format(uid)
     if link_url:
-        payload["link_attachment"] = link_url
-
-    created = _http_json(
-        "https://graph.threads.net/v1.0/{}/threads".format(urllib.parse.quote(user_id, safe="")),
-        method="POST",
-        form_body=payload,
-    )
+        try:
+            created = _http_json(endpoint, method="POST", form_body={**base_payload, "link_attachment": link_url})
+        except Exception as e:
+            print("  [threads] link_attachment failed, retrying plain text:", e)
+            created = _http_json(endpoint, method="POST", form_body=base_payload)
+    else:
+        created = _http_json(endpoint, method="POST", form_body=base_payload)
     creation_id = created["id"]
 
     # Brief wait recommended by Meta before publishing container
@@ -202,7 +214,7 @@ def post_to_threads(text: str, link_url: Optional[str] = None) -> str:
 
     # Step 2: Publish container
     published = _http_json(
-        "https://graph.threads.net/v1.0/{}/threads_publish".format(urllib.parse.quote(user_id, safe="")),
+        "https://graph.threads.net/v1.0/{}/threads_publish".format(uid),
         method="POST",
         form_body={"creation_id": creation_id, "access_token": token},
     )
@@ -273,7 +285,7 @@ def main() -> None:
             print("[bluesky] Skipped (BLUESKY_HANDLE / BLUESKY_APP_PASSWORD not set)")
 
     if "threads" in targets:
-        if os.environ.get("THREADS_USER_ID") and os.environ.get("THREADS_ACCESS_TOKEN"):
+        if os.environ.get("THREADS_ACCESS_TOKEN"):
             try:
                 url = post_to_threads(text, link_url=link_url)
                 print("[threads] Posted:", url)
@@ -281,7 +293,7 @@ def main() -> None:
                 print("[threads] ERROR:", e)
                 errors.append("threads: {}".format(e))
         else:
-            print("[threads] Skipped (THREADS_USER_ID / THREADS_ACCESS_TOKEN not set)")
+            print("[threads] Skipped (THREADS_ACCESS_TOKEN not set)")
 
     if errors:
         sys.exit("One or more platforms failed: " + "; ".join(errors))
