@@ -7,6 +7,20 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: { default: "JunkPrice Battle｜どっちの売値が高い？ガラクタお宝鑑定クイズ", template: "%s｜JunkPrice Battle" },
   description: "ゴミに見えるジャンク品、フリマで高く売れるのはどっち？実物写真で2択鑑定クイズ＆ガラクタ相場図鑑。",
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: "JunkPrice Battle",
+    title: "どっちの売値が高い？ガラクタお宝鑑定クイズ＆相場図鑑",
+    description: "壊れた・古い・空っぽ…それでも売れる！実物写真で2択のフリマ相場当てバトル。",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "JunkPrice Battle ガラクタお宝鑑定クイズ" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "どっちの売値が高い？ガラクタお宝鑑定クイズ｜JunkPrice Battle",
+    description: "ゴミに見えるジャンク品、フリマで高く売れるのはどっち？実物写真で2択鑑定バトル！",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

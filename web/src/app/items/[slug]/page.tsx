@@ -21,9 +21,26 @@ export async function generateMetadata({ params }: { params: P }): Promise<Metad
   const { slug } = await params;
   const it = getItemBySlug(slug);
   if (!it) return {};
+  const title = `${it.title}の売値相場は${yen(it.average_price)}？`;
+  const description = `${it.title}（${it.subtitle ?? ""}）のフリマ相場は${yen(it.min_price)}〜${yen(it.max_price)}。${it.why_it_sells ?? ""}`.slice(0, 160);
+  const ogImage = it.image_url || "/og-image.png";
   return {
-    title: `${it.title}の売値相場は${yen(it.average_price)}？`,
-    description: `${it.title}（${it.subtitle ?? ""}）のフリマ相場は${yen(it.min_price)}〜${yen(it.max_price)}。${it.why_it_sells ?? ""}`.slice(0, 160),
+    title,
+    description,
+    openGraph: {
+      type: "article",
+      locale: "ja_JP",
+      siteName: "JunkPrice Battle",
+      title,
+      description,
+      images: [{ url: ogImage, alt: it.title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
   };
 }
 

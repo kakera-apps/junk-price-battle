@@ -1,0 +1,53 @@
+name: Auto post to X (daily)
+
+# 毎日 8:00 JST (2択クイズ＋比較画像) と 20:00 JST (ガラクタ豆知識＋図鑑URL) を X に自動投稿
+on:
+  schedule:
+    - cron: "0 23 * * *" # 08:00 JST (quiz)
+    - cron: "0 11 * * *" # 20:00 JST (trivia)
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Post mode (quiz / trivia / auto)"
+        required: true
+        default: "quiz"
+        type: choice
+        options:
+          - quiz
+          - trivia
+          - auto
+      dry_run:
+        description: "Dry run (do not post to X)"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Japanese font & Python deps
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk
+          pip install tweepy pillow python-dotenv
+      - name: Post to X
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          SITE_URL: "https://junkproduct.com"
+          INPUT_MODE: ${{ github.event.inputs.mode || 'auto' }}
+          INPUT_DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          if [ "$INPUT_DRY_RUN" = "true" ]; then
+            python pipeline/src/x_poster.py --mode "$INPUT_MODE" --dry-run
+          elif [ -n "$X_API_KEY" ]; then
+            python pipeline/src/x_poster.py --mode "$INPUT_MODE"
+          else
+            echo "X_API_KEY secret is not set; skipping live post."
+          fi
